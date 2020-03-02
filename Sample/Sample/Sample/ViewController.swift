@@ -18,7 +18,7 @@ class ViewController: UIViewController {
         self.view = view
         
         let redView = UIView().builder
-            .mkLayout
+            .mkAnchor
             .add(at: view)
             .top(to: view, at: .safeTop, comparer: .equal)
             .left(to: view, at: .safeLeft, constant: 16, comparer: .equal)
@@ -28,7 +28,7 @@ class ViewController: UIViewController {
         redView.backgroundColor = .brown
         
         let indigoView = UIView().builder
-            .mkLayout
+            .mkAnchor
             .add(at: self.view)
             .top(to: redView, at: .centerY, comparer: .equal)
             .left(to: redView, at: .centerX, comparer: .equal)
@@ -38,7 +38,7 @@ class ViewController: UIViewController {
         indigoView.backgroundColor = .blue
         
         let pinkView = UIView().builder
-            .mkLayout
+            .mkAnchor
             .add(at: self.view)
             .top(to: indigoView, at: .centerY, comparer: .equal)
             .leading(to: indigoView, at: .centerX, comparer: .equal)
@@ -48,7 +48,7 @@ class ViewController: UIViewController {
         pinkView.backgroundColor = .systemPink
         
         let label = UILabel().builder
-            .mkLayout
+            .mkAnchor
             .add(at: self.view)
             .centerX(to: view, at: .safeCenterX, comparer: .equal)
             .bottom(to: view, at: .safeBottom, comparer: .equal)
@@ -62,4 +62,3 @@ class ViewController: UIViewController {
 
 
 }
-
