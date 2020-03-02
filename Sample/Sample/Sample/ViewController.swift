@@ -14,7 +14,7 @@ class ViewController: UIViewController {
     override func loadView() {
         
         let view = UIView()
-        view.backgroundColor = .systemBackground
+        view.backgroundColor = .white
         self.view = view
         
         let redView = UIView().builder
@@ -25,7 +25,7 @@ class ViewController: UIViewController {
             .size(width: AnchorSize(120, .equal))
             .equalHeightToWidth()
             .active()
-        redView.backgroundColor = .systemPink
+        redView.backgroundColor = .brown
         
         let indigoView = UIView().builder
             .mkLayout
@@ -35,7 +35,7 @@ class ViewController: UIViewController {
             .width(to: redView, at: .width, comparer: .equal)
             .height(to: redView, at: .height, comparer: .equal)
             .active()
-        indigoView.backgroundColor = .systemIndigo
+        indigoView.backgroundColor = .blue
         
         let pinkView = UIView().builder
             .mkLayout
@@ -57,7 +57,7 @@ class ViewController: UIViewController {
         
         label.adjustsFontSizeToFitWidth = true
         label.text = "This is Test Layout"
-        label.textColor = .label
+        label.textColor = .black
     }
 
 

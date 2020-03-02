@@ -3,7 +3,7 @@ import UIKit
 
 
 //MARK: - KEY
-private var MKLayoutKey: Int = 0
+private var MkAnchorKey: Int = 0
 private var BuilderKey: Int = 1
 
 public enum Comparer {
@@ -148,22 +148,22 @@ public class ViewBuilder<UIOwner> {
     }
 }
 extension ViewBuilder where UIOwner: UIView {
-    public var mkLayout: MKLayOut<UIOwner> {
-        return _mkLayout
+    public var mkAnchor: MKAnchor<UIOwner> {
+        return _mkAnchor
     }
     
-    private var _mkLayout: MKLayOut<UIOwner> {
+    private var _mkAnchor: MKAnchor<UIOwner> {
         get {
-            if let value = objc_getAssociatedObject(self, &MKLayoutKey) as? MKLayOut<UIOwner> {
+            if let value = objc_getAssociatedObject(self, &MkAnchorKey) as? MKAnchor<UIOwner> {
                 return value
             }
             
-            let layout = MKLayOut(uiOwner)
-            self._mkLayout = layout
+            let layout = MKAnchor(uiOwner)
+            self._mkAnchor = layout
             return layout
         }
         set {
-            objc_setAssociatedObject(self,&MKLayoutKey,
+            objc_setAssociatedObject(self,&MkAnchorKey,
                                      newValue,
                                      objc_AssociationPolicy.OBJC_ASSOCIATION_RETAIN_NONATOMIC)
         }
@@ -203,10 +203,10 @@ public struct AnchorSize {
     }
 }
 //MARK: - MKLayOut
-public class MKLayOut<Owner: UIView> {
+public class MKAnchor<Owner: UIView> {
     
     //MARK: - Instance
-    private weak var owner: Owner?
+    public private(set) weak var owner: Owner?
     
     private var xAnchor: NSLayoutConstraint? {
         willSet {

@@ -8,7 +8,6 @@
 
 /* Begin PBXBuildFile section */
 		C395020E240CF94000319565 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = C395020D240CF94000319565 /* AppDelegate.swift */; };
-		C3950210240CF94000319565 /* SceneDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = C395020F240CF94000319565 /* SceneDelegate.swift */; };
 		C3950212240CF94000319565 /* ViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = C3950211240CF94000319565 /* ViewController.swift */; };
 		C3950215240CF94000319565 /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = C3950213240CF94000319565 /* Main.storyboard */; };
 		C3950217240CF94200319565 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = C3950216240CF94200319565 /* Assets.xcassets */; };
@@ -19,7 +18,6 @@
 /* Begin PBXFileReference section */
 		C395020A240CF94000319565 /* Sample.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Sample.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		C395020D240CF94000319565 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
-		C395020F240CF94000319565 /* SceneDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SceneDelegate.swift; sourceTree = "<group>"; };
 		C3950211240CF94000319565 /* ViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ViewController.swift; sourceTree = "<group>"; };
 		C3950214240CF94000319565 /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/Main.storyboard; sourceTree = "<group>"; };
 		C3950216240CF94200319565 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
@@ -59,7 +57,6 @@
 			isa = PBXGroup;
 			children = (
 				C395020D240CF94000319565 /* AppDelegate.swift */,
-				C395020F240CF94000319565 /* SceneDelegate.swift */,
 				C3950211240CF94000319565 /* ViewController.swift */,
 				C3950213240CF94000319565 /* Main.storyboard */,
 				C3950216240CF94200319565 /* Assets.xcassets */,
@@ -148,7 +145,6 @@
 			files = (
 				C3950212240CF94000319565 /* ViewController.swift in Sources */,
 				C395020E240CF94000319565 /* AppDelegate.swift in Sources */,
-				C3950210240CF94000319565 /* SceneDelegate.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -295,13 +291,14 @@
 				CODE_SIGN_STYLE = Automatic;
 				DEVELOPMENT_TEAM = 5BY5MQ6875;
 				INFOPLIST_FILE = Sample/Info.plist;
+				IPHONEOS_DEPLOYMENT_TARGET = 11.0;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
 				PRODUCT_BUNDLE_IDENTIFIER = com.milkyo.app.Sample;
 				PRODUCT_NAME = "$(TARGET_NAME)";
-				SWIFT_VERSION = 5.0;
+				SWIFT_VERSION = 4.0;
 				TARGETED_DEVICE_FAMILY = "1,2";
 			};
 			name = Debug;
@@ -313,13 +310,14 @@
 				CODE_SIGN_STYLE = Automatic;
 				DEVELOPMENT_TEAM = 5BY5MQ6875;
 				INFOPLIST_FILE = Sample/Info.plist;
+				IPHONEOS_DEPLOYMENT_TARGET = 11.0;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
 				PRODUCT_BUNDLE_IDENTIFIER = com.milkyo.app.Sample;
 				PRODUCT_NAME = "$(TARGET_NAME)";
-				SWIFT_VERSION = 5.0;
+				SWIFT_VERSION = 4.0;
 				TARGETED_DEVICE_FAMILY = "1,2";
 			};
 			name = Release;
