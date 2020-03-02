@@ -1,0 +1,16 @@
+{
+  "object": {
+    "pins": [
+      {
+        "package": "MKLayout",
+        "repositoryURL": "https://github.com/dp221125/MKLayout",
+        "state": {
+          "branch": null,
+          "revision": "0796f87c65d7c09a4d319142e8153d627970a829",
+          "version": "0.1.1"
+        }
+      }
+    ]
+  },
+  "version": 1
+}
