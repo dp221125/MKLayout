@@ -1,8 +1,29 @@
-# MKLayout
+# MKLayouts
 
-This was made to make the UI easier and more concise using NSLayoutAnchor.
+[![CI Status](https://img.shields.io/travis/dp221125/MKLayouts.svg?style=flat)](https://travis-ci.org/dp221125/MKLayouts)
+[![Version](https://img.shields.io/cocoapods/v/MKLayouts.svg?style=flat)](https://cocoapods.org/pods/MKLayouts)
+[![License](https://img.shields.io/cocoapods/l/MKLayouts.svg?style=flat)](https://cocoapods.org/pods/MKLayouts)
+[![Platform](https://img.shields.io/cocoapods/p/MKLayouts.svg?style=flat)](https://cocoapods.org/pods/MKLayouts)
+
+## Example
+
+To run the example project, clone the repo, and run `pod install` from the Example directory first.
 
 ## Requirements
 
-- Swift 4
-- iOS 11
+## Installation
+
+MKLayouts is available through [CocoaPods](https://cocoapods.org). To install
+it, simply add the following line to your Podfile:
+
+```ruby
+pod 'MKLayouts'
+```
+
+## Author
+
+dp221125, dp221125@naver.com
+
+## License
+
+MKLayouts is available under the MIT license. See the LICENSE file for more info.
