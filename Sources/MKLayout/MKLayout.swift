@@ -158,9 +158,9 @@ extension ViewBuilder where UIOwner: UIView {
                 return value
             }
             
-            let layout = MKAnchor(uiOwner)
-            self._mkAnchor = layout
-            return layout
+            let mkAnchor = MKAnchor(uiOwner)
+            self._mkAnchor = mkAnchor
+            return mkAnchor
         }
         set {
             objc_setAssociatedObject(self,&MkAnchorKey,
