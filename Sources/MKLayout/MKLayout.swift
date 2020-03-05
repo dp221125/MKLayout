@@ -12,11 +12,25 @@ public enum Comparer {
     case greater
 }
 public enum Anchor {
-    case x
-    case y
+    case anyX
+    case centerX
+    case leading
+    case left
+    case trailing
+    case right
+    
+    case anyY
+    case centerY
+    case top
+    case bottom
+    case firstBaseline
+    case laseBaseline
+    
     case width
     case height
     case all
+    
+    case automatic
 }
 //MARK: - AnchType
 public enum AnchorType {
@@ -76,6 +90,21 @@ public enum AnchorType {
                 return to.layoutMarginsGuide.rightAnchor
             }
         }
+        
+        fileprivate func convertToAnchor() -> Anchor {
+            switch self {
+            case .centerX, .safeCenterX, .marginCenterX:
+                return .centerX
+            case .leading, .safeLeading,.marginLeading:
+                return .leading
+            case .left, .safeLeft, .marginLeft:
+                return .left
+            case .trailing, .safeTrailing, .marginTrailing:
+                return .trailing
+            case .right, .safeRight, .marginRight:
+                return .right
+            }
+        }
     }
     
     public enum YType {
@@ -119,6 +148,21 @@ public enum AnchorType {
                 return to.safeAreaLayoutGuide.bottomAnchor
             case .marginBottom:
                 return to.layoutMarginsGuide.bottomAnchor
+            }
+        }
+        
+        fileprivate func convertToAnchor() -> Anchor {
+            switch self {
+            case .centerY, .safeCenterY, .marginCenterY:
+                return .centerY
+            case .top, .safeTop, .marginTop:
+                return .top
+            case .bottom,.safeBottom, .marginBottom:
+                return .bottom
+            case .firstBaseline:
+                return .firstBaseline
+            case .lastBaseline:
+                return .laseBaseline
             }
         }
     }
@@ -208,17 +252,9 @@ public class MKAnchor<Owner: UIView> {
     //MARK: - Instance
     public private(set) weak var owner: Owner?
     
-    private var xAnchor: NSLayoutConstraint? {
-        willSet {
-            self.xAnchor?.isActive = false
-        }
-    }
+    private var xAnchor = [Anchor: NSLayoutConstraint]()
     
-    private var yAnchor: NSLayoutConstraint? {
-        willSet {
-            self.yAnchor?.isActive = false
-        }
-    }
+    private var yAnchor = [Anchor: NSLayoutConstraint]()
     
     private var widthAnchor: NSLayoutConstraint? {
         willSet {
@@ -232,6 +268,11 @@ public class MKAnchor<Owner: UIView> {
         }
     }
     
+    private var newXAnchor = Set<AnchorType.XType>()
+    private var newYAnchor = Set<AnchorType.YType>()
+    private var oldXAnchor = Set<AnchorType.XType>()
+    private var oldYAnchor = Set<AnchorType.YType>()
+    
     //MARK: - ADD
     @discardableResult
     public func add(at view: UIView) -> Self {
@@ -240,11 +281,11 @@ public class MKAnchor<Owner: UIView> {
         return self
     }
     
-    
     //MARK: - Top
     @discardableResult
     public func top(to view: UIView, at: AnchorType.YType, constant: CGFloat? = nil, comparer: Comparer) -> Self {
         
+        inActive([at.convertToAnchor()])
         switch comparer {
         case .equal:
             equalTop(view, at, constant)
@@ -253,29 +294,32 @@ public class MKAnchor<Owner: UIView> {
         case .greater:
             greaterTop(view, at, constant)
         }
-        
         return self
     }
     
-    private func equalTop(_ view: UIView, _ at: AnchorType.YType, _ constant: CGFloat? = nil) {
+    private func equalTop(_ view: UIView, _ type: AnchorType.YType, _ constant: CGFloat? = nil) {
         guard let owner = self.owner else { return }
-        self.yAnchor = owner.topAnchor.constraint(equalTo: at.setAnchor(view), constant: constant ?? 0)
+        self.yAnchor[type.convertToAnchor()] = owner.topAnchor.constraint(equalTo: type.setAnchor(view), constant: constant ?? 0)
+        self.newYAnchor.insert(type)
     }
     
-    private func lessTop(_ view: UIView, _ at: AnchorType.YType, _ constant: CGFloat? = nil) {
+    private func lessTop(_ view: UIView, _ type: AnchorType.YType, _ constant: CGFloat? = nil) {
         guard let owner = self.owner else { return }
-        self.yAnchor = owner.topAnchor.constraint(lessThanOrEqualTo: at.setAnchor(view), constant: constant ?? 0)
+        self.yAnchor[type.convertToAnchor()] = owner.topAnchor.constraint(lessThanOrEqualTo: type.setAnchor(view), constant: constant ?? 0)
+        self.newYAnchor.insert(type)
     }
     
-    private func greaterTop(_ view: UIView, _ at: AnchorType.YType, _ constant: CGFloat? = nil) {
+    private func greaterTop(_ view: UIView, _ type: AnchorType.YType, _ constant: CGFloat? = nil) {
         guard let owner = self.owner else { return }
-        self.yAnchor = owner.topAnchor.constraint(greaterThanOrEqualTo: at.setAnchor(view), constant: constant ?? 0)
+        self.yAnchor[type.convertToAnchor()] = owner.topAnchor.constraint(greaterThanOrEqualTo: type.setAnchor(view), constant: constant ?? 0)
+        self.newYAnchor.insert(type)
     }
     
     //MARK: - Bottom
     @discardableResult
     public func bottom(to view: UIView, at: AnchorType.YType, constant: CGFloat? = nil, comparer: Comparer) -> Self {
         
+        inActive([at.convertToAnchor()])
         switch comparer {
         case .equal:
             equalBottom(view, at, constant)
@@ -287,25 +331,29 @@ public class MKAnchor<Owner: UIView> {
         return self
     }
     
-    private func equalBottom(_ view: UIView, _ at: AnchorType.YType, _ constant: CGFloat? = nil) {
+    private func equalBottom(_ view: UIView, _ type: AnchorType.YType, _ constant: CGFloat? = nil) {
         guard let owner = self.owner else { return }
-        self.yAnchor = owner.bottomAnchor.constraint(equalTo: at.setAnchor(view), constant: constant ?? 0)
+        self.yAnchor[type.convertToAnchor()] = owner.bottomAnchor.constraint(equalTo: type.setAnchor(view), constant: constant ?? 0)
+          self.newYAnchor.insert(type)
     }
     
-    private func lesslBottom(_ view: UIView, _ at: AnchorType.YType, _ constant: CGFloat? = nil) {
+    private func lesslBottom(_ view: UIView, _ type: AnchorType.YType, _ constant: CGFloat? = nil) {
         guard let owner = self.owner else { return }
-        self.yAnchor = owner.bottomAnchor.constraint(lessThanOrEqualTo: at.setAnchor(view), constant: constant ?? 0)
+        self.yAnchor[type.convertToAnchor()] = owner.bottomAnchor.constraint(lessThanOrEqualTo: type.setAnchor(view), constant: constant ?? 0)
+          self.newYAnchor.insert(type)
     }
     
     private func greaterBottom(_ view: UIView, _ at: AnchorType.YType, _ constant: CGFloat? = nil) {
         guard let owner = self.owner else { return }
-        self.yAnchor = owner.bottomAnchor.constraint(greaterThanOrEqualTo: at.setAnchor(view), constant: constant ?? 0)
+        self.yAnchor[at.convertToAnchor()] = owner.bottomAnchor.constraint(greaterThanOrEqualTo: at.setAnchor(view), constant: constant ?? 0)
+          self.newYAnchor.insert(at)
     }
     
     //MARK: - leading
     @discardableResult
     public func leading(to view: UIView, at: AnchorType.XType, constant: CGFloat? = nil, comparer: Comparer) -> Self {
         
+        inActive([at.convertToAnchor()])
         switch comparer {
         case .equal:
             equalleading(view, at, constant)
@@ -314,31 +362,33 @@ public class MKAnchor<Owner: UIView> {
         case .greater:
             greaterleading(view, at, constant)
         }
-        
         return self
     }
     
-    private func equalleading(_ view: UIView, _ at: AnchorType.XType, _ constant: CGFloat? = nil) {
+    private func equalleading(_ view: UIView, _ type: AnchorType.XType, _ constant: CGFloat? = nil) {
         guard let owner = self.owner else { return }
-        self.xAnchor = owner.leadingAnchor.constraint(equalTo: at.setAnchor(view), constant: constant ?? 0)
+        self.xAnchor[type.convertToAnchor()] = owner.leadingAnchor.constraint(equalTo: type.setAnchor(view), constant: constant ?? 0)
+        self.newXAnchor.insert(type)
     }
     
-    private func lesslleading(_ view: UIView, _ at: AnchorType.XType, _ constant: CGFloat? = nil) {
+    private func lesslleading(_ view: UIView, _ type: AnchorType.XType, _ constant: CGFloat? = nil) {
         guard let owner = self.owner else { return }
-        self.xAnchor = owner.leadingAnchor.constraint(lessThanOrEqualTo: at.setAnchor(view), constant: constant ?? 0)
+        self.xAnchor[type.convertToAnchor()] = owner.leadingAnchor.constraint(lessThanOrEqualTo: type.setAnchor(view), constant: constant ?? 0)
+        self.newXAnchor.insert(type)
     }
     
-    private func greaterleading(_ view: UIView, _ at: AnchorType.XType, _ constant: CGFloat? = nil) {
+    private func greaterleading(_ view: UIView, _ type: AnchorType.XType, _ constant: CGFloat? = nil) {
         guard let owner = self.owner else { return }
-        self.xAnchor = owner.leadingAnchor.constraint(greaterThanOrEqualTo: at.setAnchor(view), constant: constant ?? 0)
+        self.xAnchor[type.convertToAnchor()] = owner.leadingAnchor.constraint(greaterThanOrEqualTo: type.setAnchor(view), constant: constant ?? 0)
+        self.newXAnchor.insert(type)
     }
     
     //MARK: - Left
     @discardableResult
     public func left(to view: UIView, at: AnchorType.XType, constant: CGFloat? = nil, comparer: Comparer) -> Self {
         
+        inActive([at.convertToAnchor()])
         switch comparer {
-            
         case .equal:
             equalleft(view, at, constant)
         case .less:
@@ -349,25 +399,29 @@ public class MKAnchor<Owner: UIView> {
         return self
     }
     
-    private func equalleft(_ view: UIView, _ at: AnchorType.XType, _ constant: CGFloat? = nil)  {
+    private func equalleft(_ view: UIView, _ type: AnchorType.XType, _ constant: CGFloat? = nil)  {
         guard let owner = owner else { return }
-        self.xAnchor = owner.leftAnchor.constraint(equalTo: at.setAnchor(view), constant: constant ?? 0)
+        self.xAnchor[type.convertToAnchor()] = owner.leftAnchor.constraint(equalTo: type.setAnchor(view), constant: constant ?? 0)
+        self.newXAnchor.insert(type)
     }
     
-    private func lessleft(_ view: UIView, _ at: AnchorType.XType, _ constant: CGFloat? = nil) {
+    private func lessleft(_ view: UIView, _ type: AnchorType.XType, _ constant: CGFloat? = nil) {
         guard let owner = owner else { return }
-        self.xAnchor = owner.leftAnchor.constraint(lessThanOrEqualTo: at.setAnchor(view), constant: constant ?? 0)
+        self.xAnchor[type.convertToAnchor()] = owner.leftAnchor.constraint(lessThanOrEqualTo: type.setAnchor(view), constant: constant ?? 0)
+        self.newXAnchor.insert(type)
     }
     
-    private func greaterleft(_ view: UIView, _ at: AnchorType.XType, _ constant: CGFloat? = nil) {
+    private func greaterleft(_ view: UIView, _ type: AnchorType.XType, _ constant: CGFloat? = nil) {
         guard let owner = owner else { return }
-        self.xAnchor = owner.leftAnchor.constraint(greaterThanOrEqualTo: at.setAnchor(view), constant: constant ?? 0)
+        self.xAnchor[type.convertToAnchor()] = owner.leftAnchor.constraint(greaterThanOrEqualTo: type.setAnchor(view), constant: constant ?? 0)
+        self.newXAnchor.insert(type)
     }
     
     //MARK: - trailing
     @discardableResult
     public func trailing(to view: UIView, at: AnchorType.XType, constant: CGFloat? = nil, comparer: Comparer) -> Self {
         
+        inActive([at.convertToAnchor()])
         switch comparer {
         case .equal:
             equaltrailing(view, at, constant)
@@ -379,25 +433,29 @@ public class MKAnchor<Owner: UIView> {
         return self
     }
     
-    private func equaltrailing(_ view: UIView, _ at: AnchorType.XType, _ constant: CGFloat? = nil)  {
+    private func equaltrailing(_ view: UIView, _ type: AnchorType.XType, _ constant: CGFloat? = nil)  {
         guard let owner = owner else { return }
-        self.xAnchor = owner.trailingAnchor.constraint(equalTo: at.setAnchor(view), constant: constant ?? 0)
+        self.xAnchor[type.convertToAnchor()] = owner.trailingAnchor.constraint(equalTo: type.setAnchor(view), constant: constant ?? 0)
+        self.newXAnchor.insert(type)
     }
     
-    private func lesstrailing(_ view: UIView, _ at: AnchorType.XType, _ constant: CGFloat? = nil) {
+    private func lesstrailing(_ view: UIView, _ type: AnchorType.XType, _ constant: CGFloat? = nil) {
         guard let owner = owner else { return }
-        self.xAnchor = owner.trailingAnchor.constraint(lessThanOrEqualTo: at.setAnchor(view), constant: constant ?? 0)
+        self.xAnchor[type.convertToAnchor()] = owner.trailingAnchor.constraint(lessThanOrEqualTo: type.setAnchor(view), constant: constant ?? 0)
+        self.newXAnchor.insert(type)
     }
     
-    private func greatertrailing(_ view: UIView, _ at: AnchorType.XType, _ constant: CGFloat? = nil) {
+    private func greatertrailing(_ view: UIView, _ type: AnchorType.XType, _ constant: CGFloat? = nil) {
         guard let owner = owner else { return }
-        self.xAnchor = owner.trailingAnchor.constraint(greaterThanOrEqualTo: at.setAnchor(view), constant: constant ?? 0)
+        self.xAnchor[type.convertToAnchor()] = owner.trailingAnchor.constraint(greaterThanOrEqualTo: type.setAnchor(view), constant: constant ?? 0)
+        self.newXAnchor.insert(type)
     }
     
     //MARK: - Right
     @discardableResult
     public func right(to view: UIView, at: AnchorType.XType, constant: CGFloat? = nil, comparer: Comparer) -> Self {
         
+        inActive([at.convertToAnchor()])
         switch comparer {
         case .equal:
             equalRight(view, at, constant)
@@ -410,25 +468,29 @@ public class MKAnchor<Owner: UIView> {
         return self
     }
     
-    private func equalRight(_ view: UIView, _ at: AnchorType.XType, _ constant: CGFloat? = nil) {
+    private func equalRight(_ view: UIView, _ type: AnchorType.XType, _ constant: CGFloat? = nil) {
         guard let owner = self.owner else { return }
-        self.xAnchor = owner.rightAnchor.constraint(equalTo: at.setAnchor(view), constant: constant ?? 0)
+        self.xAnchor[type.convertToAnchor()] = owner.rightAnchor.constraint(equalTo: type.setAnchor(view), constant: constant ?? 0)
+        self.newXAnchor.insert(type)
     }
     
-    private func lessRight(_ view: UIView, _ at: AnchorType.XType, _ constant: CGFloat? = nil) {
+    private func lessRight(_ view: UIView, _ type: AnchorType.XType, _ constant: CGFloat? = nil) {
         guard let owner = self.owner else { return }
-        self.xAnchor = owner.rightAnchor.constraint(lessThanOrEqualTo: at.setAnchor(view), constant: constant ?? 0)
+        self.xAnchor[type.convertToAnchor()] = owner.rightAnchor.constraint(lessThanOrEqualTo: type.setAnchor(view), constant: constant ?? 0)
+        self.newXAnchor.insert(type)
     }
     
-    private func greaterRight(_ view: UIView, _ at: AnchorType.XType, _ constant: CGFloat? = nil) {
+    private func greaterRight(_ view: UIView, _ type: AnchorType.XType, _ constant: CGFloat? = nil) {
         guard let owner = self.owner else { return }
-        self.xAnchor = owner.rightAnchor.constraint(greaterThanOrEqualTo: at.setAnchor(view), constant: constant ?? 0)
+        self.xAnchor[type.convertToAnchor()] = owner.rightAnchor.constraint(greaterThanOrEqualTo: type.setAnchor(view), constant: constant ?? 0)
+        self.newXAnchor.insert(type)
     }
     
     //MARK: - CenterX
     @discardableResult
     public func centerX(to view: UIView, at: AnchorType.XType, constant: CGFloat? = nil, comparer: Comparer) -> Self {
         
+        inActive([at.convertToAnchor()])
         switch comparer {
         case .equal:
             equalCenterX(view, at, constant)
@@ -437,29 +499,32 @@ public class MKAnchor<Owner: UIView> {
         case .greater:
             greaterCenterX(view, at, constant)
         }
-        
         return self
     }
     
-    private func equalCenterX(_ view: UIView, _ at: AnchorType.XType, _ constant: CGFloat? = nil) {
+    private func equalCenterX(_ view: UIView, _ type: AnchorType.XType, _ constant: CGFloat? = nil) {
         guard let owner = self.owner else { return }
-        self.xAnchor = owner.centerXAnchor.constraint(equalTo: at.setAnchor(view), constant: constant ?? 0)
+        self.xAnchor[type.convertToAnchor()] = owner.centerXAnchor.constraint(equalTo: type.setAnchor(view), constant: constant ?? 0)
+        self.newXAnchor.insert(type)
     }
     
-    private func lessCenterX(_ view: UIView, _ at: AnchorType.XType, _ constant: CGFloat? = nil) {
+    private func lessCenterX(_ view: UIView, _ type: AnchorType.XType, _ constant: CGFloat? = nil) {
         guard let owner = self.owner else { return }
-        self.xAnchor = owner.centerXAnchor.constraint(lessThanOrEqualTo: at.setAnchor(view), constant: constant ?? 0)
+        self.xAnchor[type.convertToAnchor()] = owner.centerXAnchor.constraint(lessThanOrEqualTo: type.setAnchor(view), constant: constant ?? 0)
+        self.newXAnchor.insert(type)
     }
     
-    private func greaterCenterX(_ view: UIView, _ at: AnchorType.XType, _ constant: CGFloat? = nil) {
+    private func greaterCenterX(_ view: UIView, _ type: AnchorType.XType, _ constant: CGFloat? = nil) {
         guard let owner = self.owner else { return }
-        self.xAnchor = owner.centerXAnchor.constraint(greaterThanOrEqualTo: at.setAnchor(view), constant: constant ?? 0)
+        self.xAnchor[type.convertToAnchor()] = owner.centerXAnchor.constraint(greaterThanOrEqualTo: type.setAnchor(view), constant: constant ?? 0)
+        self.newXAnchor.insert(type)
     }
     
     //MARK: - CenterY
     @discardableResult
     public func centerY(to view: UIView, at: AnchorType.YType, constant: CGFloat? = nil, comparer: Comparer) -> Self {
         
+        inActive([at.convertToAnchor()])
         switch comparer {
         case .equal:
             equalCenterY(view, at, constant)
@@ -471,19 +536,22 @@ public class MKAnchor<Owner: UIView> {
         return self
     }
     
-    private func equalCenterY(_ view: UIView, _ at: AnchorType.YType, _ constant: CGFloat? = nil) {
+    private func equalCenterY(_ view: UIView, _ type: AnchorType.YType, _ constant: CGFloat? = nil) {
         guard let owner = self.owner else { return }
-        self.yAnchor = owner.centerYAnchor.constraint(equalTo: at.setAnchor(view), constant: constant ?? 0)
+        self.yAnchor[type.convertToAnchor()] = owner.centerYAnchor.constraint(equalTo: type.setAnchor(view), constant: constant ?? 0)
+        self.newYAnchor.insert(type)
     }
     
-    private func lesslCenterY(_ view: UIView, _ at: AnchorType.YType, _ constant: CGFloat? = nil) {
+    private func lesslCenterY(_ view: UIView, _ type: AnchorType.YType, _ constant: CGFloat? = nil) {
         guard let owner = self.owner else { return }
-        self.yAnchor = owner.centerYAnchor.constraint(lessThanOrEqualTo: at.setAnchor(view), constant: constant ?? 0)
+        self.yAnchor[type.convertToAnchor()] = owner.centerYAnchor.constraint(lessThanOrEqualTo: type.setAnchor(view), constant: constant ?? 0)
+        self.newYAnchor.insert(type)
     }
     
-    private func greaterCenterY(_ view: UIView, _ at: AnchorType.YType, _ constant: CGFloat? = nil) {
+    private func greaterCenterY(_ view: UIView, _ type: AnchorType.YType, _ constant: CGFloat? = nil) {
         guard let owner = self.owner else { return }
-        self.yAnchor = owner.centerYAnchor.constraint(greaterThanOrEqualTo: at.setAnchor(view), constant: constant ?? 0)
+        self.yAnchor[type.convertToAnchor()] = owner.centerYAnchor.constraint(greaterThanOrEqualTo: type.setAnchor(view), constant: constant ?? 0)
+        self.newYAnchor.insert(type)
     }
     
     //MARK: - Size
@@ -596,7 +664,7 @@ public class MKAnchor<Owner: UIView> {
     
     //MARK: - Active
     @discardableResult
-    public func active(isAutoResizeMask: Bool = false, anchor: [Anchor] = [.all])  -> Owner {
+    public func active(isAutoResizeMask: Bool = false, anchor: [Anchor] = [.automatic])  -> Owner {
         owner?.translatesAutoresizingMaskIntoConstraints = isAutoResizeMask
         self.switchingActive(anchor, true)
         owner?.layoutIfNeeded()
@@ -604,12 +672,12 @@ public class MKAnchor<Owner: UIView> {
     }
     
     @discardableResult
-    public func safeActive(isAutoResizeMask: Bool = false, anchor: [Anchor] = [.all])  -> Owner? {
+    public func safeActive(isAutoResizeMask: Bool = false, anchor: [Anchor] = [.automatic])  -> Owner? {
         owner?.translatesAutoresizingMaskIntoConstraints = isAutoResizeMask
         self.switchingActive(anchor, true)
         owner?.layoutIfNeeded()
         return owner
-    
+        
     }
     
     @discardableResult
@@ -620,13 +688,13 @@ public class MKAnchor<Owner: UIView> {
             print("View Status: nil")
         }
         
-        if let xAnchor = self.xAnchor {
+        if self.xAnchor.count > 0  {
             print("X Anchor Status: \(xAnchor)")
         }  else {
             print("X Anchor Status: nil")
         }
         
-        if let yAnchor = self.yAnchor {
+        if self.yAnchor.count > 0 {
             print("Y Anchor Status: \(yAnchor)")
         }  else {
             print("Y Anchor Status: nil")
@@ -649,7 +717,7 @@ public class MKAnchor<Owner: UIView> {
     }
     
     @discardableResult
-    public func inactive(_ anchor: [Anchor]) -> Self {
+    public func inActive(_ anchor: [Anchor]) -> Self {
         switchingActive(anchor, false)
         return self
     }
@@ -657,22 +725,102 @@ public class MKAnchor<Owner: UIView> {
     private func switchingActive(_ anchors: [Anchor], _ isActive: Bool) {
         anchors.forEach { anchor in
             switch anchor {
-            case .x:
-                self.xAnchor?.isActive = isActive
-            case .y:
-                self.yAnchor?.isActive = isActive
+            case .anyX:
+                xAnchorSwitch(isActive)
+            case .anyY:
+                yAnchorSwitch(isActive)
             case .width:
                 self.widthAnchor?.isActive = isActive
             case .height:
                 self.heightAnchor?.isActive = isActive
             case .all:
-                self.xAnchor?.isActive = isActive
-                self.yAnchor?.isActive = isActive
-                self.widthAnchor?.isActive = isActive
-                self.heightAnchor?.isActive = isActive
+                xAnchorSwitch(isActive)
+                yAnchorSwitch(isActive)
+                dimensionAnchorSwitch(isActive)
+            case .centerX:
+                self.xAnchor[.centerX]?.isActive = isActive
+            case .leading:
+                self.xAnchor[.leading]?.isActive = isActive
+            case .left:
+                self.xAnchor[.left]?.isActive = isActive
+            case .trailing:
+                self.xAnchor[.trailing]?.isActive = isActive
+            case .right:
+                self.xAnchor[.right]?.isActive = isActive
+            case .centerY:
+                self.yAnchor[.centerY]?.isActive = isActive
+            case .top:
+                self.yAnchor[.top]?.isActive = isActive
+            case .bottom:
+                self.yAnchor[.bottom]?.isActive = isActive
+            case .firstBaseline:
+                 self.yAnchor[.firstBaseline]?.isActive = isActive
+            case .laseBaseline:
+                self.yAnchor[.laseBaseline]?.isActive = isActive
+            case .automatic:
+                
+                if isActive {
+                    automaticActive()
+                } else {
+                    automaticInActive()
+                }
+                
+                dimensionAnchorSwitch(isActive)
             }
         }
-       
+        
+
+    }
+    
+    private func  automaticActive() {
+        while !self.newXAnchor.isEmpty {
+            if let anchor = self.newXAnchor.popFirst() {
+                self.xAnchor[anchor.convertToAnchor()]?.isActive = true
+                self.oldXAnchor.insert(anchor)
+            }
+        }
+        
+        while !self.newYAnchor.isEmpty {
+            if let anchor = self.newYAnchor.popFirst() {
+                self.yAnchor[anchor.convertToAnchor()]?.isActive = true
+                self.oldYAnchor.insert(anchor)
+            }
+        }
+    }
+    
+    private func  automaticInActive() {
+        while !self.oldXAnchor.isEmpty {
+            if let anchor = self.oldXAnchor.popFirst() {
+                self.xAnchor[anchor.convertToAnchor()]?.isActive = false
+            }
+        }
+        
+        while !self.oldYAnchor.isEmpty {
+            if let anchor = self.oldYAnchor.popFirst() {
+                self.yAnchor[anchor.convertToAnchor()]?.isActive = false
+            }
+        }
+    }
+    
+    private func xAnchorSwitch(_ isActive: Bool) {
+        self.xAnchor[.centerX]?.isActive = isActive
+        self.xAnchor[.leading]?.isActive = isActive
+        self.xAnchor[.left]?.isActive = isActive
+        self.xAnchor[.trailing]?.isActive = isActive
+        self.xAnchor[.right]?.isActive = isActive
+    }
+    
+    private func yAnchorSwitch(_ isActive: Bool) {
+        self.yAnchor[.centerY]?.isActive = isActive
+        self.yAnchor[.top]?.isActive = isActive
+        self.yAnchor[.bottom]?.isActive = isActive
+        self.yAnchor[.firstBaseline]?.isActive = isActive
+        self.yAnchor[.laseBaseline]?.isActive = isActive
+    }
+    
+    private func dimensionAnchorSwitch(_ isActive: Bool) {
+        self.widthAnchor?.isActive = isActive
+        self.heightAnchor?.isActive = isActive
     }
     
     //MARK: - Init
