@@ -673,7 +673,6 @@ public class MKAnchor<Owner: UIView> {
     public func active(isAutoResizeMask: Bool = false, anchor: [Anchor] = [.automatic])  -> Owner {
         owner?.translatesAutoresizingMaskIntoConstraints = isAutoResizeMask
         self.switchingActive(anchor, true)
-        owner?.layoutIfNeeded()
         return owner!
     }
     
@@ -681,7 +680,6 @@ public class MKAnchor<Owner: UIView> {
     public func safeActive(isAutoResizeMask: Bool = false, anchor: [Anchor] = [.automatic])  -> Owner? {
         owner?.translatesAutoresizingMaskIntoConstraints = isAutoResizeMask
         self.switchingActive(anchor, true)
-        owner?.layoutIfNeeded()
         return owner
         
     }
