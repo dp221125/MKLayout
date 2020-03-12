@@ -65,7 +65,7 @@ public enum AnchorType {
             case .leading:
                 return to.leadingAnchor
             case .safeLeading:
-                return to.safeAreaLayoutGuide.trailingAnchor
+                return to.safeAreaLayoutGuide.leadingAnchor
             case .trailing:
                 return to.trailingAnchor
             case .safeTrailing:
@@ -79,7 +79,7 @@ public enum AnchorType {
             case .safeRight:
                 return to.safeAreaLayoutGuide.rightAnchor
             case .marginCenterX:
-                return to.layoutMarginsGuide.trailingAnchor
+                return to.layoutMarginsGuide.centerXAnchor
             case .marginLeading:
                 return to.layoutMarginsGuide.leadingAnchor
             case .marginLeft:
@@ -235,6 +235,12 @@ extension ViewBuilderable {
                                      newValue,
                                      objc_AssociationPolicy.OBJC_ASSOCIATION_RETAIN_NONATOMIC)
         }
+    }
+    
+    @discardableResult
+    public func assign<Root>(to keyPath: ReferenceWritableKeyPath<Root, Self?>, on object: Root) -> Self  {
+        object[keyPath: keyPath] = self
+        return self
     }
 }
 public struct AnchorSize {
