@@ -6,7 +6,7 @@ final class MKLayoutTests: XCTestCase {
         // This is an example of a functional test case.
         // Use XCTAssert and related functions to verify your tests produce the correct
         // results.
-        XCTAssertEqual(MKLayout().text, "Hello, World!")
+//        XCTAssertEqual(MKLayout().text, "Hello, World!")
     }
 
     static var allTests = [
